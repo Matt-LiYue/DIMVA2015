@@ -1,0 +1,671 @@
+% This is based on the LLNCS.DEM the demonstration file of
+% the LaTeX macro package from Springer-Verlag
+% for Lecture Notes in Computer Science,
+% version 2.4 for LaTeX2e as of 16. April 2010
+%
+% See http://www.springer.com/computer/lncs/lncs+authors?SGWID=0-40209-0-0-0
+% for the full guidelines.
+%
+\documentclass{llncs}
+\usepackage{geometry}
+\usepackage{indentfirst}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{amssymb, amsmath}
+\usepackage{booktabs, array, multirow}
+
+
+\begin{document}
+\pagestyle{plain}
+\title{Understand Amazon Wish List -- User Shopping Preference and Privacy Exposer}
+%
+\titlerunning{Amazon}  % abbreviated title (for running head)
+%                                     also used for the TOC unless
+%                                     \toctitle is used
+%
+\author{Yue Li\inst{1} \and Nan Zheng\inst{1}
+Haining Wang\inst{2} \and Kun Sun\inst{1}\and Zhaoliang Duan\inst{1} \and Cheng Li\inst{1}}
+%
+\authorrunning{Yue Li et al.} % abbreviated author list (for running head)
+%
+%%%% list of authors for the TOC (use if author list has to be modified)
+\tocauthor{Yue Li, Nan Zheng, Haining Wang, Kun Sun, Zhaoliang Duan, and Cheng Li}
+%
+\institute{College of William and Mary\\
+\email{yli@cs.wm.edu}
+\and University of Delaware}
+\maketitle              % typeset the title of the contribution
+
+\begin{abstract}
+The malware used for IV\&V was based on actual malware source code that
+performs a variety of functions (e.g., key logging, clip board stealing, etc). The
+source code was acquired by DARPA, combined into different executables, and
+compiled using various flags into Windows 32-bit binaries. There are three data
+sets associated with this data, TC1, TC2 and TC3. TC1 contains 50 samples
+of malware and eight components. TC2 contains same eight components, but
+added compiler variations (e.g., optimizations on or off) to produce a data set
+of 250 malware samples. Finally, TC3 contained 27 total components over 500
+malware samples, where 250 of the malware samples are the same ones from
+TC2.
+\end{abstract}
+
+
+\section{Introduction}
+Entering the era of big-data, Internet has been largely extended to be data-rich. Network users are prone to expose their private information in public websites inadvertently \cite{frankowski2006you}, making themselves face the threat of information leakage. To study how the information bundle can be used to threat user privacy by ordinary entities, we investigate Wish Lists of Amazon. Our quantitative study unveils the user behaviour exposure problem and potential privacy leakage from Amazon Wish List. 
+
+
+
+
+Profiles also provide basic information of the users —- name or nickname, birthday, location, and self-description. Note that the birthday information does not include the year and the location includes solely state and city. These information are optional. Amazon profiles are always public accessible and wish lists are public accessible by default, which provides the possibility of relatively large-scale data crawling. 
+
+
+In this project, we collected profile and wish lists information of over 20,000 users in Amazon. However, we mainly process 14,000 users who have more than 30 items in their wish lists. Based on the data we make the following analysis.
+
+\begin{enumerate}
+\item We find user shopping preference. User shopping preference can be organized in 3 dimensions — 1)What to buy 2)When to buy 3)Product prices they are paying. For 1),We analyze wish lists in each of the users we collected and present some interesting observations. For example, we found that users from different locations buy different products. We also found that people add more items in their wish lists in special dates (holidays).
+\item We wish to identify user personal information such as gender, occupation, hobby, education, and age. We used existing machine learning tools to train and test the data. We obtain the ground truth from user self-description in their amazon profiles
+\end{enumerate}
+
+There are 4 main steps in completing this project -- 1)data collection 2)Basic measurement 3)user information retrieval 4)user information identification. Each step will have some challenges, we will elaborate the challenges and the solutions in detail in Methodology Section. 
+
+\section{Related Work}
+
+There are a large amount of works that have been done to learn plain text. \cite{de2001mining} mines e-mail content for author identification. They study an extended set of email document features, which include structure, linguistic patterns, etc. They use SVM learning algorithm to differentiate the authors of emails. \cite{pang2002thumbs}presented algorithm for mining users' opinions of an item from their reviews of the items, classifying documents in overall sentiment. They use keywords appearing in the user comments of an item to infer whether the user like this item or not and to what extend do they like/dislike the item.
+
+\cite{Lee:2010:USS:1835449.1835522} does statistical analysis of the properties of spam profiles collected from social network communities for creating spam classifiers to actively filter out existing and new spammers. \cite{dave2003mining} describes the system infrastructure, identify the unique properties of list of product attributes and develops a method for automatically distinguishing between positive and negative reviews in Movie Lens to link forum posts to mentioned items. \cite{kraft2007mashing}attempts to do on a set of Amazon wish lists spiders from web. They started by doing a wish lists search of people names(first names and nicknames from the baby names databases) and then retrieve the results linking to the wish lists of the first 25 matches. 
+
+
+
+
+\section{Methodology}
+\subsection{Amazon Data Collection}
+In this section, we crawl amazon by web scraping. We run a python script to download amazon web pages and retrieve useful information in these pages. The collection process consists of 3 steps.
+\begin{enumerate}
+\item Search a common name in the search engine provided by Amazon \cite{searcheng}.
+
+The search engine is shown in Figure~\ref{searcheng}. Although the search engine state hundreds of thousand users are found, Amazon will return at most 2000 users that are associated with this name. The information returned include user profile, which possibly have basic user information (birthday without year or city and state, or both), and user wish list names and link to the lists. This step will provide us with the target users and their public wish lists. 
+
+\begin{figure}[H].
+\centering
+\includegraphics[width=.85\textwidth]{searcheng.png}
+\caption{A web page of Amazon product}.
+\label{searcheng}
+\end{figure}
+
+\item Find the items inside each of the wish list in a target user.
+
+Given that we have recorded the wish list URLs and IDs from the first step, we downloaded pages of the user's wish lists. We then record each item in each of the wish list. However, in this step we have little information about the item (Only the name, and the date the item is added). We obtain the URLs to the item page and visit them to retrieve more information in the third step. Noe that currently we do not find a upper limit on the number of items inside a wish list and some items may no longer exist in Amazon so the link may fail or be greyed out. 
+\item Retrieve detailed information for each item. 
+
+In this step, we visit all the item URLs and download the product pages, hopefully (but not with 100\% success rate) we can find the price and categories of the items. Besides the category, we also record subcategories listed in the page. 
+
+
+\end{enumerate}
+
+Although the third step seems straightforward, actually this step is the most tricky part in the whole data collection process. We found that there are at least 5 kinds of product web pages which needed separate treatment. In addition, the web pages will evolve through time such that no or wrong information is recorded. It make it even harder to debug given that from time to time there are connection failures.
+One example of the product web pages is shown in Figure~\ref{itempage}
+
+\begin{figure}[H].
+\centering
+\includegraphics[width=.85\textwidth]{item.png}
+\caption{A web page of Amazon product}.
+\label{itempage}
+\end{figure}
+
+In Figure~\ref{itempage}, we can easily find the item type and the item price. The information is retrieved from the source code of the page by finding the content in certain tags. Note that there may not always be only one price for an item. For example, for the same item, there can be prices from different retailers. There are also differences between new ones and used ones. We record only the most obvious price -- the price the first retailer and in this case, the amazon prime price, and we only record prices of new items.
+
+Figure~\ref{subcat} shows the aforementioned subcategory of the item in Figure~\ref{itempage}. As we can see from the figure, the item can have multiple possible subcategories. We also record these information in the database. Note that not always we can find the price of an item. There are multiple reasons -- 1)There is no price on the page 2)The price is rendered using client-side javascript, which will not be run when crawling the web pages 3)Network failures. However, it does not impact our analysis much.
+
+Collecting Amazon data can cost months since the bottleneck is downloading the web pages of each item. This process is pretty slow and error-prone, given the pages usually consist of thousands of lines and the network may not always be in good condition. What is more, Amazon changes its page rendering so that no data is recorded or even worse, wrong data pollutes the database. Note that Amazon has provided API of its items to its AWS users (One can easily register as an AWS user for one year for free). If we can use the API to fetch data from Amazon database, it will accelerate the process significantly. However, we insist using web scraping instead of API because API does not provide the type and subcategory information about the products. 
+
+Finally we recorded the wish lists of 20099 users, 3320211 total items and 1448806 unique items in our databases. 
+
+\begin{figure}[H].
+\centering
+\includegraphics[width=.85\textwidth]{subcat.png}
+\caption{A web page of Amazon product}.
+\label{subcat}
+\end{figure}
+
+
+\subsection{Wish List Measurement}
+We use our data in different ways. The very first step is to do fundamental measurements on the dataset. We wish to have a basic understanding about the usage of wish lists and to what extent do the users expose their personal information in Amazon. There are several things we wish to find out:
+\begin{enumerate}
+\item How many people expose their birthday or location information to the public, and how many people have written self-description, which also contains certain amount of personal information
+\item distribution of wish lists for each user, and distribution of items for each wish list. 
+\item Different shopping preference in different locations. In this project we simply assign the users with 3 labels -- east coast, west coast, and middle of the US.
+\item Shopping pattern during holidays and normal days.
+\end{enumerate}
+
+The basic measurement study gives us a basic understanding of the user shopping preference and pattern. We will also learn the difference between different regions in the US. These information are valuable to advertisers and commercial companies. 
+\subsection{User Information Retrieval}
+To successfully identify the user personal information. One difficult we face is how to obtain the ground truth of the user. There are several possible ways to find out the result. First, Services such as yahoo people search can be used as ground truth at a reasonable monetary cost. We can input the name and location information in the search engine to identify a user. Second, similar to the first approach, we can search people in online social networks such as Facebook or Twitter. Third, we can use the user self-description as the ground truth. Users sometimes expose personal information in their self-description and we can take advantage of it.
+
+The first approach does not really provide an accurate result since the information given is not rigorous enough to identify the exact person. If wrongly identified, it has much negative impact on the identification process, which is by itself not very accurate already. The second approach is similar to the first one. It is even more inaccurate. Due to the unreliable nature of the first 2 approaches, we decided to take the third approach. Note that there are also limitations for the third approach. For example, not everybody in our data set has a self-description. Second, even the user has self-description, the self-description may not contain meaningful information. 
+
+We retrieve the user information using a key-word approach. If the self-description contains the key-word, we can classify the user into certain groups. For example if a user has a key-word "student", we will classify this user as a student. 
+
+We assume that everybody is telling the truth in the self-descriptions. If somebody is lying, we do not have a way to identify it. However, it is meaningless for a user to lie in self-descriptions since lying there will not bring them any benefit. If a user concerns his/her privacy, he/she can simply leave the self-description blank instead of lying. 
+
+
+\subsection{User Personal Information Identification}
+We have divided user into different classifications in the previous steps. In this step, we are going to use machine learning techniques to re-identify user personal informations. We use the feature of the type distribution of all the items in user's wish lists, which gives us a vector of length 50. We adjust the kernel function and parameters to give the best results. The target personal information includes gender, occupation, education level, and hobbies. 
+
+
+\section{Data Overview}
+We used sqlite, a light and easy-to-use databse, to store the data. There are 5 tables stored in the database. The structure of the tables are illustrated in Table~\ref{tab1}.
+
+\begin{table*}[H]
+\centering
+\begin{tabular}{llllll}
+\hline
+Table name & customer & customerwishlist & wishlistitem & item & itemtype \\ \hline
+attribute1 & name & customer ID &list ID  &item ID & itemID  \\ \hline
+attribute2 & user ID & list ID &item ID  & item name & subtype 1   \\ \hline
+attribute3   & Birthday & & added time  &p rice & subtype 2    \\ \hline
+attribute4   & address  & & & type &     \\ \hline
+attribute5      & self-description & & & &\\ \hline
+\end{tabular}
+\caption{Table information}
+\label{tab1}
+\end{table*}
+
+In the first step of the data collection process. We searched the top 600 common names (300 males \cite{mnames} and 300 females \cite{fnames} in Amazon, which theoretically returns 1,200,000 users. However, as different searchings may return the same user, For example, if a man named "James Paul", he will be returned when searching either "James" or "Paul". Therefore the returned names have some repetition. As a result, we actually collected 967,603 unique users.Their profile information and wish list links are stored in the database. However, we do not collect the wish lists and items of all the users returned. As we are interested in identifying the personal information of a user, we only collect the wish lists and items of users who potentially have ground truth -- users with self-description. At this stage, we have collected 20099 users with self-descriptions, together with all the items and wish lists. Besides the users, we collected 48848 wish lists, 3320211 total items and 1448806 unique items. The size of the data is approximately 1GB. 
+\section{Measurement Results}
+\subsection{Basic statistics}
+For all 967,603 users, there are totally 2,121,173 wish lists recorded, which means each user has 2.2 wish lists in their Amazon profile. Among the 967,603 users, 104846 (10.8\%) of them have input their self-descriptions. In addition, there are 280,328 (29.0\%) users who have filled their birthday information, 221,298 (22.9\%) users who have filled their location information, and 150,004 (15.5\%) users who have filled both the birthday and address information. In addition, among the 104,846 users, 94,284 (89.9\%) of them have birthday information and 59,731 (57\%) of them have address information. Although the birthday and address information is not particular (birthday only shows month and day and address only shows the city and state), we can still see that a non-trivial portion of users put their personal information on their amazon profiles. What is more, most of the people who have filled out a self-description have exposed their birthday and address information. One can argue that the open birthday information may be of some use (so others can prepare birthday presents). However, the address information is meaningless for a user to expose in the public since the gift givers cannot ship the user a present based solely on the address information (the information is too broad). In this case, users are giving out their personal information for nothing. Our findings agree with \cite{frankowski2006you}, which states that users tend to expose their personal information in open websites. 
+
+As we did not collect a complete dataset for all the users, we then analyze only the users we have collected so far. In the completed user dataset, we have 20,099 users and 48,848 wish lists. We can see that the average number of wish lists a user have is 2.43 in the completed dataset, which is a little higher than that of the whole dataset. We believe the little gap is reasonable because the users who have filled the self-descriptions seems using Amazon more (they tend to input birthday information, address information, and products in their wish lists). 
+
+The maximum number of wish list in a user profile in our data set is 184. We further analyze the distribution of the number of wish list a user has, which is shown in Figure~\ref{avglist}
+
+\begin{figure}[H].
+\centering
+\includegraphics[width=.85\textwidth]{avglist.png}
+\caption{Number of lists the users have}.
+\label{avglist}
+\end{figure}
+
+Similarly, analyze the distribution of the number of wish list a user has, which is shown in Figure~\ref{avgitem}. The maximum number of items in a wish list in our dataset is 5,238 and the average number of items in a wish list is 68.
+
+
+\begin{figure}[H].
+\centering
+\includegraphics[width=.85\textwidth]{avgitem.png}
+\caption{Number of items the lists have}.
+\label{avgitem}
+\end{figure}
+
+As we can see from the two figures, both the distributions of wish lists and items follow a similar trend -- most of the users have around average number of wish lists and most wish lists have average number of items. However, there are a few of the data points are far from the average. 
+
+Another thing we are interested in is the price of the items. The average price of all the items 47.16 US dollars. The distribution of the prices are shown in Figure~\ref{avgprice}. The price figure is more irregular than the Figure~\ref{avglist} and Figure~\ref{avgitem} because the data points in Figure~\ref{avgprice} is much more than the other 2 figures.
+
+\begin{figure}[H].
+\centering
+\includegraphics[width=.85\textwidth]{avgprice.png}
+\caption{Number of items the lists have}.
+\label{avgprice}
+\end{figure}
+
+As we can see from Figure~\ref{avgword}, more than half of the self-descriptions have length lower than or equal to 6 words (10592 out of 20099).
+
+\subsection{User preference in different regions}
+In this section we analyze the user preference in different regions, which are -- east coast, west coast, and middle of the US according to Wikipedia \cite{east}\cite{west}. It is natural to consider that people may have different shopping preference in different regions. We quantitatively show the differences in this section as well as presenting interesting observations. The average price of east coast, west coast, and middle of US is \$25.69, \$27.33 and \$24.87 accordingly. As the price in Amazon will not be different for users from different regions, our result indicates that the price sensitivity is highest in middle area of the US, and is lowest in the west coast area. It agrees with the common knowledge -- the average income in coastal area is higher than the middle area, and the west coast is higher than the east coast. 
+
+We further look into the detailed The top 20 preferences for people from east coast is shown in Table~\ref{tb:east}. The top 20 preferences for people from west coast is shown in Table~\ref{tb:west} and the top 20 preferences for people from middle of the US is shown in Table~\ref{tb:mid}
+
+\begin{table}[!htbp]
+\caption{EAST COAST USER PREFERENCE}
+\label{tb:east}
+\begin{tabular}{lllll}
+Rank & Item Type          & Number of Items & Percentage of Items & Average Price(\$) \\
+1 & Books & 210205 & 41.44\% & \$6.19 \\
+2 & Movies \& TV & 63648 & 12.55\% & \$17.11 \\
+3 & CDs \& Vinyl & 46726 & 9.21\% & \$9.75 \\
+4 & Buy a Kindle & 25859 & 5.10\% & \$9.77 \\
+5 & Toys \& Games & 25542 & 5.04\% & \$41.73 \\
+6 & Sports \& Outdoors & 15619 & 3.08\% & \$48.73 \\
+7 & Video Games & 14819 & 2.92\% & \$31.01 \\
+8 & Amazon Fashion & 11379 & 2.24\% & \$45.26 \\
+9 & All Electronics & 9054 & 1.79\% & \$123.91 \\
+10 & Home Improvement & 8929 & 1.76\% & \$60.18 \\
+11 & Kitchen \& Dining & 8209 & 1.62\% & \$53.59 \\
+12 & Home \& Kitchen & 6702 & 1.32\% & \$58.87 \\
+13 & Camera \& Photo & 5647 & 1.11\% & \$314.25 \\
+14 & Computers & 5516 & 1.09\% & \$119.79 \\
+15 & Health \& Personal Care & 4302 & 0.85\% & \$48.56 \\
+16 & Digital Music & 3776 & 0.74\% & \$0.00 \\
+17 & Patio, Lawn \& Garden & 3642 & 0.72\% & \$88.11 \\
+18 & Automotive & 3478 & 0.69\% & \$62.53 \\
+19 & Musical Instruments & 3157 & 0.62\% & \$154.15 \\
+20 & Cell Phones \& Accessories & 2867 & 0.57\% & \$37.65 \\
+\end{tabular}
+\end{table}
+
+\begin{table}[!htbp]
+\caption{WEST COAST USER PREFERENCE}
+\label{tb:west}
+\begin{tabular}{lllll}
+Rank & Item Type          & Number of Items & Percentage of Items & Average Price(\$) \\
+1 & Books & 145939 & 41.99\% & \$6.10 \\
+2 & Movies \& TV & 46266 & 13.31\% & \$16.52 \\
+3 & CDs \& Vinyl & 33981 & 9.78\% & \$8.85 \\
+4 & Buy a Kindle & 18072 & 5.20\% & \$9.98 \\
+5 & Toys \& Games & 16351 & 4.70\% & \$40.03 \\
+6 & Sports \& Outdoors & 9191 & 2.64\% & \$57.02 \\
+7 & Video Games & 8708 & 2.51\% & \$30.75 \\
+8 & Amazon Fashion & 7223 & 2.08\% & \$85.60 \\
+9 & Home Improvement & 7002 & 2.01\% & \$66.70 \\
+10 & All Electronics & 6756 & 1.94\% & \$147.81 \\
+11 & Kitchen \& Dining & 4905 & 1.41\% & \$51.04 \\
+12 & Home \& Kitchen & 4448 & 1.28\% & \$71.36 \\
+13 & Camera \& Photo & 4267 & 1.23\% & \$322.14 \\
+14 & Computers & 3908 & 1.12\% & \$117.42 \\
+15 & Digital Music & 2921 & 0.84\% & \$0.00 \\
+16 & Health \& Personal Care & 2801 & 0.81\% & \$40.73 \\
+17 & Automotive & 2383 & 0.69\% & \$63.70 \\
+18 & Musical Instruments & 2022 & 0.58\% & \$128.10 \\
+19 & Cell Phones \& Accessories & 1878 & 0.54\% & \$36.98 \\
+20 & Patio, Lawn \& Garden & 1808 & 0.52\% & \$108.02 \\
+\end{tabular}
+\end{table}
+
+\begin{table}[!htbp]
+\caption{MIDDLE OF US USER PREFERENCE}
+\label{tb:mid}
+\begin{tabular}{lllll}
+Rank & Item Type          & Number of Items & Percentage of Items & Average Price(\$) \\
+1 & Books & 362966 & 43.96\% & \$8.27 \\
+2 & Movies \& TV & 112737 & 13.65\% & \$16.11 \\
+3 & CDs \& Vinyl & 75685 & 9.17\% & \$9.19 \\
+4 & Buy a Kindle & 43510 & 5.27\% & \$9.37 \\
+5 & Toys \& Games & 42419 & 5.14\% & \$37.36 \\
+6 & Video Games & 24587 & 2.98\% & \$29.93 \\
+7 & Sports \& Outdoors & 20101 & 2.43\% & \$50.90 \\
+8 & Amazon Fashion & 16635 & 2.01\% & \$76.39 \\
+9 & Home Improvement & 12977 & 1.57\% & \$69.84 \\
+10 & All Electronics & 12009 & 1.45\% & \$124.05 \\
+11 & Kitchen \& Dining & 11292 & 1.37\% & \$45.95 \\
+12 & Home \& Kitchen & 10321 & 1.25\% & \$59.15 \\
+13 & Camera \& Photo & 7488 & 0.91\% & \$338.27 \\
+14 & Computers & 6993 & 0.85\% & \$125.67 \\
+15 & Digital Music & 6965 & 0.84\% & \$0.00 \\
+16 & Health \& Personal Care & 5458 & 0.66\% & \$37.70 \\
+17 & Automotive & 5021 & 0.61\% & \$66.18 \\
+18 & Patio, Lawn \& Garden & 4666 & 0.57\% & \$101.79 \\
+19 & Musical Instruments & 4245 & 0.51\% & \$151.28 \\
+20 & Grocery \& Gourmet Food & 3915 & 0.47\% & \$18.99 \\
+\end{tabular}
+\end{table}
+
+From the tables we can see that Books are dominating the wish lists in these areas with all over 40\% of the items being books. one thing to note is that although the price sensitivity is highest in the middle area, people there are more likely to accept higher price on books, given that the average price of books in the middle area is 33.6\% and 35.6\% higher than east and west coast correspondingly. Our analysis indicates that there are more reading lovers in the middle area of the US. Besides books, entertainment also plays an important roles. Movies\& TV and CDs \& Vinyl rank second and third in the wish lists. In fact, in all the 3 areas, the top categories are basically the same, which means that people from different regions are likely to buy similar types of products. However, there are still differences. For example, people from west and middle are willing to pay much more in fashion (clothing, shoes, etc) than people from east (west -- \$85.6, middle -- \$76.4, east -- \$45.3). On the other hand, people from east are willing to pay more in Health \& Personal care (around 20\% higher in average price). Besides, people from coastal areas seem purchasing more electronics and computers than the middle area. Another interesting finding is that people from west are willing to tolerate higher price in Sports \& Outdoors. These information is valuable to companies to promote their products and advertisers to find the price preferences for different users. There are certainly other interesting differences among these different regions. However, at this point we do not do further explorations.
+
+\subsection{User preference in different time}
+Intuitively, people believe that more items may be added to the wish lists during holidays. We verify it in this section, comparing the items added in the wish lists during holidays and normal days. 2 top holidays for shopping are examined in our experiments -- Thanks giving (November 28) and Christmas (December 25) of the year 2013. We consider the consecutive 5 days around the holidays to be holiday shopping and other days are normal days. For example, we consider November 26 to November 30 to be Thanksgiving. 
+
+In our dataset, 654,724 items are added in the year 2013. Among all the items 14,615 items are added during Thanksgiving and 11,624 items are added during Christmas, which means the rest 628,485 items are added in the rest of 2013. After calculation, we show that the average items added during Thanksgiving is 2,923 items per day and the average items added during Christmas is 2,324 items per day. The average number of items added during the rest 355 days is 1,770. We can see a significant increase in Thanksgiving (with an increase of \%65.1) and Christmas (with an increase of \%31.3). Our result agrees with the common belief that people tend to shop more during holidays . Note that our result may even be underestimated since there are certainly other holidays during the left 355 days. The increase may be even larger if we take all other holidays into account. However, our result is already good enough to prove that people do shop more in holidays. 
+
+\section{User Information Retrieval}
+As we have mentioned before, user information retrieval is a vital part for user personal information identification. However, this is also a very challenging step. We have decided to retrieve the ground truth information from the self-descriptions in user profiles in order to train and test our data using machine learning techniques. These information will be used to classify the users into different groups. However, this step is not easy. There are certain requirements for the information retrieval stage.
+\begin{enumerate}
+\item As the information retrieved serves as the ground truth, the resulted information must be reliable enough. Ambiguous information will greatly harm the results of classification.
+\item The information must be broad enough to have adequate people assigned to a certain group. We need to have a relatively large dataset to do the training and testing. However, the dataset cannot be too large since in SVM the training is very resource consuming. Several hundred may be a good number for each class. 
+\end{enumerate}
+
+One obvious way to retrieve information is to search the keyword. If a keyword appears in one user's self-description, there is high probability that the user is related to the keyword. For example, if a keyword "college" appears in the self-description, the user is likely to have a college degree. 
+
+A more advanced way is to leverage the Open Directory Project (ODP) \cite{dmoz}, which groups web listings under a similar topic into categories. Categories can include smaller categories. ODP is able to provide a hierarchy structure of the categories. For example, if the word "piano" appears in a user's self-description and we wish to classify the user, we simply input "piano" into DMOZ, a web interface for ODP. We probably will have the follwing result:
+
+\begin{verbatim}
+1. Arts: Music: Instruments: Keyboard: Piano: Pianists: Jazz (114)
+2. Shopping: Music: Instruments: Keyboard: Piano (41)
+3. Arts: Music: Instruments: Keyboard: Piano: Education (31)
+4. Arts: Music: Instruments: Keyboard: Piano: Pianists: S (25)
+5. Arts: Music: Instruments: Keyboard: Piano: Pianists: Jazz: Brubeck, Dave (20)
+\end{verbatim}
+
+We can see the result is of a hierarchical structure, which includes broad categories to smaller subcategories. ODP seems working very well in this case since the categories are pretty relative. Then we can assign labels such as "Arts", "Music", and "Instrument" to the user. Then we have another problem -- how to determine which word to input to DMOZ? One cannot expect a good result from a word "play" inputing in DMOZ. This can be done using the Stanford POS tagger \cite{toutanova2003feature}, the tagger will help identifying the nouns in a sentence, which are good candidate for inputing. It seems like a practical way to use ODP. However, we do not use ODP in this project, for mainly 2 reasons
+
+\begin{enumerate}
+\item The categories in ODP are too much, which means too many labels. Too many labels may make the classification very difficult and inaccurate. Besides, retrieving information from ODP is likely to obscure particular information into broad categories. 
+\item Most importantly, the accuracy of ODP is not very high. In the piano case it works pretty well. However, if we take other examples, we may have a different result. For example, if we have a user that says he/she is a doctor, which is pretty common in our dataset. We probably obtain the result as the following:
+\begin{verbatim}
+1. Health: Medicine: Directories: Doctors (7)
+2. Arts: Movies: Titles: D: Doctor Zhivago - 1965 (6)
+3. Arts: Television: Programs: Science Fiction and Fantasy: D: Doctor Who (31)
+4. Arts: Television: Programs: Science Fiction and Fantasy: D: Doctor Who: Organizations (11)
+5. Arts: Television: Programs: Science Fiction and Fantasy: D: Doctor Who: Books: Authors (10)
+\end{verbatim}
+We cannot regard this result to be accurate. Although the first row is accurate, the other 4 rows are giving totally irrelevant information. And it is very hard to differentiate useful information from irrelevant information. 
+\end{enumerate}
+
+As a result, we keep using the first approach -- using keyword to label users. First, we carefully chooses the keywords so that the keywords are very relevant to a certain class. Examples are "engineer", "student", etc. After searching the dataset, we can obtain sufficient users that have the labels, which is acceptable to do the classification. Therefore the key-word approach satisfy the 2 aforementioned requirements.
+
+\section{Personal Information Identification}
+We do personal information identification on a subset of users who have more than 30 items in their wish lists in our dataset. We filter part of the users out because they do not have sufficient information in their wish lists. After the filtering, we have 13,464 users as our target users. We choose users with certain keywords in their self-descriptions in the user pool. We use the portion of different types of products in user wish lists as input to the classifier. Therefore we have an input vector of length of 50. We use SVM classifier to train and test the data. 80\% of our data is used as training data and the rest of 20\% of the data as testing data. As the personal information we wish to identify does not seem to correlate with each other much. We do separate machine learning cycles to identify different types of information, which means that every time we wish to identify a kind of personal information, we choose a new set of data and do an independent learning.
+
+The second feature of the personal information identification process is binary, which means that we use only 2 classes in each identification cycle. The reasons for having only 2 classes is that the accuracy of the identification is not high except for certain information (like gender). Having more classes will make the classification quite inaccurate. It is reasonable to have 2 classes in a classifier. We intend to answer questions like "Is he a professor?", "Does he have a university diploma" or "Does he like hiking?". A prediction of the answer is very helpful in identifying a user. We try 4 different types of personal information -- 1) gender 2) occupation 3)education level 4) hobbies. 
+
+\subsection{gender}
+There are only 2 genders in general, it is natural to have only 2 classes. To save the training resource while maintaining high representation, we chose 389 males and 168 females as our dataset. We used the first 80\% person as the training set and the rest as the test set. The result is as following:
+
+\begin{verbatim}
+Confusion Matrix:
+        predicted labels:
+        FEMALE  MALE 
+ FEMALE   30     4   
+   MALE   14     64  
+success rate: 0.839286
+balanced success rate: 0.851433
+area under ROC curve: 0.921192
+area under ROC 50 curve: 0.921192 
+\end{verbatim}
+The success rate to classify whether a given user is a male or female is around 
+We can see that the classifier works pretty well in the case of gender, which means that given the type distribution of all the items of a user, we can easily identify whether this user is male or female.
+
+\subsection{occupation}
+To predict the occupation of a user, we choose "professor" as our test case. This is because professors usually have different shopping pattern than normal people. For example, they tend to buy more books, or high-tech tools. We have obtained 62 professors and randomly chosen 198 non-professors as our data. The result of our case is shown below.
+\begin{verbatim}
+Confusion Matrix:
+               predicted labels:
+              NOT professor   professor   
+ NOT professor      28            12      
+     professor      6             7       
+success rate: 0.660377
+balanced success rate: 0.619231
+area under ROC curve: 0.670192
+area under ROC 50 curve: 0.670192 
+\end{verbatim}
+
+The success rate is not very high this time compared to the case of different gender. This is reasonable because the type portions are not strong indicators of the user's occupation. However, the success rate of 66\% is also very helpful to predict whether a user is a professor or not. 
+
+\subsection{Education level}
+We choose "university" and "high school" as the keywords for the education level case. People mentioned "university" in their self-descriptions are likely to be a university graduate while people mentioned "high school" are more likely to be high school graduate. We obtained 251 high school graduate and 725 university graduate in our dataset. The result is as following:
+\begin{verbatim}
+Confusion Matrix:
+             predicted labels:
+            high school  university 
+ high school     21          30     
+  university     46          99     
+success rate: 0.612245
+balanced success rate: 0.547262
+area under ROC curve: 0.557674
+area under ROC 50 curve: 0.548966 
+\end{verbatim}
+
+Similar to the case of occupation, the success rate is not strong. However, our result still proves that there are certain differences between high school graduate and university graduate in their shopping behaviors, and we can exploit these differences to help identify the education level of a user.
+
+\subsection{hobbies}
+It may be reasonable to consider that the shopping pattern is closely related to the hobbies of a user since the user tends to buy products related to their hobbies. We use "electronic" to prove our intuition. We 128 electronic lovers and 197 from the rest of the user pool to do the classification. The result is as following:
+\begin{verbatim}
+Confusion Matrix:
+                predicted labels:
+                NOT electronic   electronic  
+ NOT electronic       29             11      
+     electronic       12             14      
+success rate: 0.651515
+balanced success rate: 0.631731
+area under ROC curve: 0.650000
+area under ROC 50 curve: 0.650000 
+\end{verbatim}
+
+The success rate is still not high enough to be considered good. However, we do see a positive relation between the types of items in the wish lists and the user's hobbies. 
+
+\section{Limitation}
+There are limitations in our work. We discuss the limitations and possible consequences from these limitations. 
+\begin{enumerate}
+\item The data may be biased. The user wish lists are not always public -- users have the ability to change the accessibility of their wish lists (although the default is public). Therefore privacy-aware users may choose to publicize some of their wish lists while keep other wish lists from strangers. Besides, users may choose not to share certain items in their wish lists. For example, privacy-sensitive items such as pregnancy test, firearm-related products, and medicine \& drugs. In our work we can only retrieve the product in public wish lists. The data may not be accurately representative of one users' shopping behavior.
+
+\item When data of price is involved, some products are ignored. We have mentioned that the price cannot always be retrieved. There are multiple reasons and some of them cannot be easily solved such as price not being displayed or javascript being used for displaying the price. Besides, some prices do not accurately reflect the user's preference because there might be multiple prices (from various retailers, used ones or new ones), and we do not know which one does the user prefer. We take only the new one and the first retailer's price. 
+
+\item When doing personal information identification. We actually do not have complete ground truth. Using the keyword approach will give us a group of people with certain features. However, we cannot identify a large enough group without the features. For example, searching "engineer" gives us a group of engineers, however, we do not know whether the users not mentioning "enginner" in their self-descriptions are engineers or not. This lack of complete ground truth may have big negative impact on the success rate of our information identification step.
+
+\end{enumerate}
+\section{Future Work}
+There is still a lot of space so that we can improve this project. In this section we discuss future work that can be done.
+\begin{enumerate}
+\item Consider subcategories. We have recorded subcategories of products in our database. However, currently the information is not used. In our measurement study, we found that people from different regions have similar shopping pattern. It may no longer be held when taking subcategories into account. We may find more interesting results when the categorization is more particular. In addition, using the information of subcategories can also benefit the user information identification step. We can possibly achieve higher success rate with the assistance from the subcategories.
+\item Use possibly better information retrieval method. In our project, the information retrieval step is straight-forward -- we search the keywords in users' self-descriptions to label the users. It works with relatively high accuracy. However, this method is a little too strict so that not many users are selected for a certain class. One way to improve our result is to use a better information retrieval method. We can possibly obtain more users for a specific group while maintaining relatively high accuracy. It will provide more stable data and probably more well-trained SVM.
+\item Use more features when doing machine learning. Actually 3 features have been tried -- 1)the portions of different types of items in their wish lists 2) total number of items in the wish list 3) average price for the items. However, the result of learning is even worse than the case in which only the first feature is used. Therefore we gave up the last 2 features. It is in fact reasonable to take the number of items and average prices into account when doing machine learning. Maybe finding more features and do better data normalization will help increase the success rate. 
+\item There are 2 ways to improve the user personal information identification process. The first way is to improve the accuracy of the classification step. The second way is to use our method as a filter to filter out irrelevant users and use some other strategies to do further identification.
+\end{enumerate}
+\section{Conclusion}
+In this project, we investigate Amazon public wish lists, where users store their desired products. We collect over 20,000 users' complete profile and wish list items and take a 2-step approach to analyze our data. The first step is that we try to measure the user behavior from their wish lists. We answer the following questions: 1) Are users from different regions follow the same shopping patter? Is there any difference among people in different regions? 2) Is the common belief that people shop more during special date, especially holidays reflected in Amazon wish list? Our result shows that although people from different regions are following a general shopping behavior, they still have differences. Interesting observations such as east coast people are less willing to pay high price on clothing are presented in our measurement result. The second step we take is trying to identify personal information from the items in a user's wish list. We retrieve our ground truth information from the data using a keyword approach -- searching a keyword in users' self-descriptions to divide users into different classes. This approach works well because it is accurate while it labels sufficient people for machine learning purpose. We use SVM to train and classify the data obtained from the information retrieval step. We examined 4 types of personal information -- gender, occupation, education level and hobbies on our dataset. We use the first 80\% data for training and the rest 20\% of data for testing. The gender classification gives a good success rate of over 80\%. However, the other 3 types of personal information does not achieve a satisfying success rate -- all with around or a little more than \%60. This accuracy is not good enough to identify users' personal information. However, it can provide help when trying to identify a user with some other tools as a filtering strategy. Or it can be further improved to serve as a tool to identify users' personal information with higher success rate. 
+
+
+\section{Introduction and background}
+
+The introduction, background information is included in the project report for Advanced Network Security class. So I will omit this part. This report includes more measurement study on wish lists, self descriptions, and machine learning. A quick recap is that we do this project in 3 steps:
+
+\begin{enumerate}
+\item Collect information from Amazon, including users' wish lists and their profile information, which includes a self-description in plain text. We do measurement on wish lists.
+\item We retrieve personal information from user self-descriptions, which serve as ground truth in the next step.
+\item We do machine learning to learn user personal information from wish lists and verify the information using ground truth we obtained from the previous step.
+\end{enumerate}
+\section{More study on wish lists measurement}
+\subsection{Holidays}
+In this section we measure how the items are added in the wish lists during holidays and normal days. Only federal holidays are considered. These holidays (http://www.usa.gov/citizens/holidays.shtml) are listed in Table~\ref{tb:holiday}
+
+
+
+\begin{table}[!ht]
+\centering
+\caption{FREQUENT NOUNS IN SELF-DESCRIPTIONS}
+\label{tb:holiday}
+\begin{tabular}{p{2cm}p{6cm}p{6cm}p{2cm}}
+& New Year's Day & January 1 & \\
+& Birthday of Martin Luther King, Jr. & third Monday in January & \\
+& Washington's Birthday & third Monday of February & \\
+& Memorial Day & last Monday of May & \\
+& Independence Day & July 4 & \\
+& Labor Day & first Monday of September & \\
+& Columbus Day & second Monday in October & \\
+& Veterans Day & November 11 & \\
+& Thanksgiving Day & fourth Thursday in November & \\
+& Christmas Day & December 25 & \\
+\end{tabular}
+\end{table}
+
+We analyze the data in 2 dimensions. First, We measure the items added in these holidays and compare the average items added in holidays and average items added in normal days. Then we compare the added items among different holidays. When calculating items added in a certain holiday, we consider the nearest consecutive 5 days. That is to say, we include the previous 2 days and the next 2 days in our holiday shopping session. For example, the Christmas day is December 25. We will include December 23, December 24, December 25, December 26, December 27 in Christmas day. As a result, calculate items added during a year in a little different manner -- we include the last 2 days in previous year because the 2 days are considered New Year's day.
+
+
+\subsubsection{Holidays and Normal Days}
+According to our data, people start to add items in their wish lists since 1999. We analyze the items added in normal days and holidays in each year by calculating the average items added in the 2 groups. Table~\ref{tb:year} shows the detailed statistics.
+
+\begin{table}[!htbp]
+\centering
+\caption{Items Added in Normal Days and Holidays}
+\label{tb:year}
+\begin{tabular}{lllll}
+Year & Avg in Normal days & Avg in Holidays & Increase & Percentage \\
+1999 & 3.60 & 5.74 & 2.14 & 59.4\% \\
+2000 & 32.88 & 36.34 & 3.46 & 10.5\% \\
+2001 & 77.42 & 76.60 & -0.82 & -1.1\% \\
+2002 & 122.00 & 136.52 & 14.52 & 11.9\% \\
+2003 & 156.00 & 166.32 & 10.32 & 6.6\% \\
+2004 & 176.41 & 184.84 & 8.43 & 4.8\% \\
+2005 & 297.15 & 315.36 & 18.21 & 6.1\% \\
+2006 & 375.32 & 395.36 & 20.04 & 5.3\% \\
+2007 & 417.15 & 455.06 & 37.91 & 9.1\% \\
+2008 & 452.08 & 472.12 & 20.04 & 4.4\% \\
+2009 & 511.98 & 540.14 & 28.16 & 5.5\% \\
+2010 & 658.89 & 725.60 & 66.71 & 10.1\% \\
+2011 & 921.30 & 1016.34 & 95.04 & 10.3\% \\
+2012 & 1254.19 & 1402.52 & 148.33 & 11.8\% \\
+2013 & 1773.25 & 1918.34 & 145.09 & 8.2\% \\
+\end{tabular}
+\end{table}
+
+From Table~\ref{tb:year} we make the following observations:
+\begin{enumerate}
+\item The items added in wish lists increase year by year, no matter in normal days or holidays. We believe that the reason behind is that electric commercial gains its popularity.
+\item There is some increase in items added during holidays. The average increase rate is 10.89\%. However, as the data for year 1999 is not sufficient to be representative, we exclude year 1999 in our calculation and eventually we conclude that there is around 5.9\% increase in holidays. 
+\item Generally people do buy more stuff during holidays. However, the increase is very limited. In 2001, the items added during holidays are even less than normal days. 
+\end{enumerate}
+
+To better illustrate the result, Figure~\ref{year} shows the items added in normal days and holidays (red line represents normal days and blue lines represent holidays). 
+
+\begin{figure}[!ht].
+\centering
+\includegraphics[width=.85\textwidth]{year.png}
+\caption{Number of items added in normal days and holidays}.
+\label{year}
+\end{figure}
+
+\begin{figure}[!ht].
+\centering
+\includegraphics[width=.85\textwidth]{holiday.png}
+\caption{Increase from normal items }.
+\label{holiday}
+\end{figure}
+
+\subsubsection{Different Holidays}
+Previously we compared the shopping difference between holidays and normal days. However, it is a little too rough to group all national holidays together to compute the average items. Intuitively we believe that holidays are also different from each other. For example, in Thanksgiving and Christmas, people tend to buy more stuff. Therefore we consider different holidays in our study. Similarly, we include the last 2 days in the previous year in our analysis. There are 10 national holidays as introduced before. We again calculate the average number of items added in the nearest consecutive 5 days and compare to the average number of normal days. 
+
+We use the data from year 1999 - 2013 and the year 2013 solely. We wish to show both the average case(from 1999-2013) and the current case (2013). The result is shown in Figure~\ref{alldiffholiday} for 15 years and Figure~\ref{diffholiday} for the year 2013. The x-axis indicate the holidays accordingly (0-New Year's day, 1-Birthday of Martin Luther King, Jr, 2-Washington's Birthday, 3-Memorial Day, 4-Independence Day, 5-Labor Day, 6-Columbus day, 7-Veterans Day, 8-Thanksgiving day, 9-Christmas day). Note that when computing the average item number added in normal days, we leave out all the holidays instead of simply leaving out the one that is being analyzed. 
+
+We use 2 set of data because we wish to see both the average case (from year 1999 to 2013) and the current trend (year 2013). We found that the 2 figures match very well, which means that people do not tend to change their shopping behaviors at least during a short peroid of time. Our result also matches our everyday experience.
+
+\begin{figure}[!ht].
+\centering
+\includegraphics[width=.85\textwidth]{alldif.png}
+\caption{Different Holidays through 15 years}.
+\label{alldiffholiday}
+\end{figure}
+
+\begin{figure}[!ht].
+\centering
+\includegraphics[width=.85\textwidth]{diff.png}
+\caption{Different Holidays in 2013}.
+\label{diffholiday}
+\end{figure}
+
+According to Figure~\ref{alldiffholiday} and Figure~\ref{diffholiday}, we find that holidays have huge difference between each other. In addition, we make the following observations:
+\begin{enumerate}
+\item Some of the holidays are not much different from normal days (For example, Columbus Day). Even some of the holidays make the people less willing to add items in their wish lists. 
+\item New Year's day, Veterans day, Thanksgiving, and Christmas day are 4 holidays that have quite obvious shopping increase. The result indicates that people tend to buy more stuff during the 4 holidays. The increase rate is 4.1\%, 25.2\%,72.8\%, and 30.2\% accordingly for all 15 years we analyzed. 
+\item Among the 4 holidays, Thanksgiving day is the most shopping appealing holiday, which is 72.8\% higher than normal days. It is reasonable because people always get considerable discount during thanksgiving days. Christmas is the second most shopping appealing holiday because people always need to buy presents during Christmas.
+\item At the first glance it is surprising that 4 holidays -- Birthday of Martin Luther King. Jr, Washington's Birthday, Memorial Day, Independence Day, and Labor day -- clearly have less items added. The drop rate is 10.7\%, 11.8\%, 9.0\%, 11.3\%, and 4.6\%. The possible reason is that People are more likely to be involved in other activities other than shopping during these holidays. 3 out of the 4 holidays are certain memorial days. Certainly these days are not good for shopping. 
+\end{enumerate}
+
+
+\section{More Study on self-description}
+subsection{Statistics}
+Among the 20099 users who have self-descriptions, 233,595 words are tagged (44,387 punctuations are excluded). The average number of words in self-descriptions is 11.6. We can see that the self-descriptions are not long -- basically the length of a normal sentence. However, the distribution of word number is shown in Figure~\ref{avgword}:
+
+\begin{figure}[!ht].
+\centering
+\includegraphics[width=.85\textwidth]{avgword.png}
+\caption{Number of items the lists have}.
+\label{avgword}
+\end{figure}
+
+As we can see from Figure~\ref{avgword}, The distribution of word length is not even. While there are scattered long self-description (the longest self-description has 682 words), more than half of the self-descriptions have length less than or equal to 6 (10592 out of 20099). And only 29.9\% of the self-descriptions have over 10 words. Considering that there are even less words that carry information, One possible consequence is that there might not be enough information in one self-description to identify any personal information.
+
+\subsection{Stanford POS tagger}
+We used Stanford Part-of-Speech (POS) tagger to tag the user self-descriptions to retrieve useful information. There are a number of tags a word can belong to. However, we only focus on noun-family words (with tag NN, NNS, NNP, and NNPS in Stanford POS tagger). The reason behind is that most of the nouns carry certain amount of information while most of other words do not carry useful information. 
+
+There are totally 95,359 out of all 233,595 words (around 40.8\%) belonging to the noun family. The ratio of nouns is quite large. The most frequent ones are listed in Table~\ref{tb:freq}
+
+\begin{table}[!ht]
+\centering
+\caption{FREQUENT NOUNS IN SELF-DESCRIPTIONS}
+\label{tb:freq}
+\begin{tabular}{p{3cm}p{3cm}p{3cm}p{3cm}p{3cm}}
+ & Rank & Item Type & frequency & \\
+ & 1 & s & 1498 &  \\
+ & 2 & love & 1327 &  \\
+ & 3 & m & 1314 &  \\
+ & 4 & university & 1098 &  \\
+ & 5 & music & 1095 &  \\
+ & 6 & list & 1064 &  \\
+ & 7 & books & 1001 &  \\
+ & 8 & school & 659 &  \\
+ & 9 & movies & 652 &  \\
+ & 10 & t & 628 &  \\
+ & 11 & games & 593 &  \\
+ & 12 & things & 553 &  \\
+ & 13 & college & 495 &  \\
+ & 14 & stuff & 443 &  \\
+ & 15 & work & 419 &  \\
+ & 16 & fan & 411 &  \\
+ & 17 & wish & 389 &  \\
+ & 18 & video & 380 &  \\
+ & 19 & history & 371 &  \\
+ & 20 & photography & 353 &  \\
+\end{tabular}
+\end{table}
+
+From Table~\ref{tb:freq} We can see that except for meaningless single characters ("s" and "m" in this case), the noun family words carry some information of a user. The information involves hobbies (such as music, books, movies, etc) and education level (such as university, college). These words can be used as keywords in the information retrieval step. On the other hand, if we look into the verbs, we will find the most popular 20 verbs are "is",  "am",  "have",  "are",  "live",  "be",  "love",  "buy",  "want",  "enjoy",  "know",  "used",  "do",  "don",  "get",  "married",  "go",  "went",  "read",  "loves",  and "was". Except "married", the other words can not assist us to find any useful information about a user.
+
+\section{Machine Learning}
+\subsection{Label Selection}
+We already used Stanford POS tagger to tag the self-descriptions and found the most popular nouns in the self-descriptions. Now we are going to test the success rate when using these labels. The testing is still done on only 2 set of data to sustain high success rate. Several change has been made on the old settings.
+\begin{enumerate}
+\item There are 3 extra features, they are 1) Total items in all of the user's wish lists 2)The average price of the items in the user's wish lists 3) The highest price of an item. Therefore finally the input vector is of size 53. The other 50 values are portions of items of a specific type.
+
+\item Standardizer from the library pyML is used to standardize the values for training and testing. Standardization is important to eliminate the case that one attribute dominates other attributes.
+\end{enumerate}
+
+We use hobbies as examples, we choose all pairs of hobbies in the top 20 nouns. 7 keywords are selected. They are -"music", "books", "movies", "games", "video", "history", and "photography" and try to differentiate users between any pair of them. The success rate between any pair of them is shown in Table~\ref{tb:hobby}
+
+\begin{table}[!ht]
+\centering
+\caption{Success Rate of Hobbies}
+\label{tb:hobby}
+\begin{tabular}{llllllll}
+            & music & books & movies & games & video & history & photography \\
+music       & NA    & 0.506 & 0.653  & 0.713 & 0.691 & 0.772   & 0.743       \\
+books       & 0.506 & NA    & 0.631  & 0.667 & 0.647 & 0.526   & 0.807       \\
+movies      & 0.653 & 0.631 & NA     & 0.617 & 0.617 & 0.762   & 0.662       \\
+games       & 0.713 & 0.667 & 0.617  & NA    & 0.521 & 0.776   & 0.703       \\
+video       & 0.691 & 0.647 & 0.617  & 0.521 & NA    & 0.777   & 0.700       \\
+history     & 0.772 & 0.526 & 0.762  & 0.776 & 0.777 & NA      & 0.680       \\
+photography & 0.743 & 0.807 & 0.662  & 0.703 & 0.700 & 0.680   & NA         
+\end{tabular}
+\end{table}
+
+We can see that the success rate can be high (80.7\%) or even no better than guessing (50.6\%). Such big variance may be due to the relativity of different hobbies. When 2 hobbies are not much related, we can find the success rate be usually higher than 70\%. For example, "history" has very limited relativity to other hobbies except for "books". We can see from the table that history has higher success rate except for the "books" entry because history relates to books pretty much. It is difficult to have further increase in success rate because people often have more than 1 hobbies. Therefore one person may belong to both group, which will have quite negative impact on the result.
+
+We conclude that wish lists are helpful to identify a user's hobby. However, depending solely on wish lists are not a very reliable option to identify user hobbies. 
+
+We then apply the education level study again. The result is shown as follows:
+
+\begin{verbatim}
+university: Totally: 725
+high school: Totally: 251
+Cpos, Cneg:  2.5641025641 7.4358974359
+testing ***********************************************************
+Confusion Matrix:
+             predicted labels:
+            high school  university 
+ high school     23          28     
+  university     48          97     
+success rate: 0.612245
+balanced success rate: 0.559973
+area under ROC curve: 0.576403
+area under ROC 50 curve: 0.567931 
+\end{verbatim}
+
+The result shows that with the extra 3 features, there is no change on the success rate, although the identifying result changes a little. We may need to try to add more features to make it work better. 
+
+\section{Remark}
+In this project. I have the following remarks:
+\begin{enumerate}
+\item There is much more to explore on the measurement part. There are some surprising observations (For example, people buy less stuff during some holidays).
+\item As far as I see, The keywords method is good enough for information retrieval since it has high accuracy. The information in self-descriptions is sparse so we cannot easily find adequate information for a certain kind of information. As the information retrieved serves as ground truth and the svm does not provide very accurate result, we require the information to be very reliable in this step. 
+\item There is limited potential on the part of personal information identification. The success rate is pretty low even between 2 groups under current setting. We can easily infer the success rate will decrease significantly if more groups are used.
+\item There are multiple reasons for not producing very satisfactory result in machine learning step. 1)Actually the correlation between wish lists and user personal information is not high 2) the features are not very easy to find and it is relatively too few in our study. 3) due to the lack of information, one user can actually belong to the 2 groups. However the user has to be assigned to one group. For example, a user may like games and music. But he/she mentioned games only. when doing classification between "games" and "music", the user can easily be trained as game lover but assigned to music group. 
+\item We can try further increase the success rate to identify the hobby. However, it would be harder to identify other personal information. 
+\end{enumerate}
+
+
+%
+% ---- Bibliography ----
+%
+\bibliographystyle{plain}
+
+\bibliography{ref}
+
+\end{document}
